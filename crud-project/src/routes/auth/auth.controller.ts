@@ -8,7 +8,7 @@ import {
 	RegisterBodyDTO,
 	RegisterResDTO,
 } from './auth.dto'
-import { AccessTokenGuard } from 'src/shared/guards/acess-token.guard'
+import { AccessTokenGuard } from 'src/shared/guards/access-token.guard'
 
 @Controller('auth')
 export class AuthController {

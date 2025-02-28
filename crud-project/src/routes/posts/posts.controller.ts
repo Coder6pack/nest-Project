@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { PostsService } from './posts.service'
+import { Auth } from 'src/shared/decorators/auth.decorator'
+import { AuthItem, ConditionGuard } from 'src/shared/constants/auth.constant'
+import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
 
 @Controller('posts')
 export class PostsController {
 	constructor(private readonly postsService: PostsService) {}
 
 	@Get()
+	@Auth([AuthItem.Bearer, AuthItem.APIKey], { condition: ConditionGuard.Or })
 	getPosts() {
 		return this.postsService.getPosts()
 	}
