@@ -1,37 +1,43 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { Auth } from 'src/shared/decorators/auth.decorator'
-import { AuthItem, ConditionGuard } from 'src/shared/constants/auth.constant'
-import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
+import { AuthItem } from 'src/shared/constants/auth.constant'
+import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
+import { CreatePostDTO, GetPostItemDTO, UpdatePostDTO } from './post.dto'
 
 @Controller('posts')
+@Auth([AuthItem.Bearer])
 export class PostsController {
 	constructor(private readonly postsService: PostsService) {}
 
 	@Get()
-	@Auth([AuthItem.Bearer, AuthItem.APIKey], { condition: ConditionGuard.Or })
-	getPosts() {
-		return this.postsService.getPosts()
+	getPosts(@ActiveUser('userId') userId: number) {
+		return this.postsService.getPosts(userId).then((posts) => posts.map((post) => new GetPostItemDTO(post)))
 	}
 
 	@Get(':id')
-	getPost(@Param('id') id: string) {
-		return this.postsService.getPost(Number(id))
+	async getPost(@Param('id') id: string, @ActiveUser('userId') userId: number) {
+		return new GetPostItemDTO(await this.postsService.getPost(Number(id), userId))
 	}
 
 	@Post()
-	createPost(@Body() body: any) {
-		return this.postsService.createPost(body)
+	async createPost(@Body() body: CreatePostDTO, @ActiveUser('userId') userId: number) {
+		return new GetPostItemDTO(await this.postsService.createPost(body, userId))
 	}
 
 	@Put(':id')
-	updatePost(@Param('id') id: string, @Body() body: any) {
-		return this.postsService.updatePost(Number(id), body)
+	async updatePost(@Param('id') id: string, @Body() body: UpdatePostDTO, @ActiveUser('userId') userId: number) {
+		return new GetPostItemDTO(
+			await this.postsService.updatePost({
+				body,
+				postId: Number(id),
+				userId,
+			}),
+		)
 	}
 
 	@Delete(':id')
-	deletePost(@Param('id') id: string) {
-		return this.postsService.deletePost(Number(id))
+	deletePost(@Param('id') id: string, @ActiveUser('userId') userId: number): Promise<{ message: string }> {
+		return this.postsService.deletePost(Number(id), userId)
 	}
 }

@@ -37,6 +37,8 @@ export default tseslint.config(
 			'@typescript-eslint/require-await': 'off',
 			'no-useless-catch': 'off',
 			'no-empty': 'off',
+			'@typescript-eslint/no-unsafe-call': 'off',
+			'@typescript-eslint/no-unsafe-return': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 		},
 	},

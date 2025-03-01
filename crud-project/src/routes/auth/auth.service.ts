@@ -90,4 +90,27 @@ export class AuthService {
 			throw new UnauthorizedException('Invalid refresh token')
 		}
 	}
+
+	async logout(refreshToken: string) {
+		try {
+			await this.authSchema.refreshToken.findUniqueOrThrow({
+				where: {
+					token: refreshToken,
+				},
+			})
+
+			await this.authSchema.refreshToken.delete({
+				where: {
+					token: refreshToken,
+				},
+			})
+
+			return { message: 'Logout successfully' }
+		} catch (error) {
+			if (isNotFoundPrismaError(error)) {
+				throw new UnauthorizedException('Invalid refresh token')
+			}
+			throw new UnauthorizedException('Invalid refresh token')
+		}
+	}
 }
